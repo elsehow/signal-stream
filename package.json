@@ -1,0 +1,14 @@
+{
+  "author": "elsehow",
+  "license": "BSD-3-Clause",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "tape test/*.js",
+    "watch": "runwatch \"**/*.js\" -r \"npm test\""
+  },
+  "devDependencies": {
+    "runwatch": "^0.1.3",
+    "tape": "^4.5.1"
+  },
+  "dependencies": {}
+}

@@ -11,10 +11,10 @@ description
 ```javascript
 ```
 
-## use
+## install
 
 ```
-npm i
+npm i .......
 ```
 
 ## license

@@ -3,7 +3,6 @@ var helpers = require('./helpers')
 var signal = require('signal-protocol')
 var read = require('fs').createReadStream
 var through = require('through2')
-var util = require('signal-protocol/src/helpers.js')
 
 var l = require('../src/helpers')
 
@@ -25,7 +24,6 @@ Promise.all([
     var builder = new signal.SessionBuilder(aliceStore, BOB_ADDRESS);
     return builder.processPreKey(preKeyBundle)
 }).then(function () {
-    //var originalMessage = util.toArrayBuffer("L'homme est condamné à être libre");
     var aliceSessionCipher = new signal.SessionCipher(aliceStore, BOB_ADDRESS);
     var bobSessionCipher = new signal.SessionCipher(bobStore, ALICE_ADDRESS);
     return [ aliceSessionCipher, bobSessionCipher ]
@@ -41,41 +39,21 @@ function log (note) {
 // // // the world's slowest impl of `echo`
 function echo ([aliceCipher, bobCipher]) {
 
-    let aliceEncrypt = require('..')
-        .encryptable(aliceCipher)
-    let aliceDecrypt = require('..')
-        .decryptable(aliceCipher)
+    let alice = require('..')(aliceCipher)
+    let bob = require('..')(bobCipher)
 
-    let bobEncrypt = require('..')
-        .encryptable(bobCipher)
-    let bobDecrypt = require('..')
-        .decryptable(bobCipher)
-
-    var kefir = require('kefir')
     console.log('starting')
     let pushPromise = (p, next) => p.then(x => next(null, x), next)
-    let streamF = f => through.obj(function (buf, enc, next) { pushPromise(f(buf), next) })
+    let streamF = f => through.obj((buf, enc, next) => pushPromise(f(buf), next))
 
-    let aliceEnc = streamF(aliceEncrypt)
-    let bobDec = streamF(bobDecrypt)
-
-    let readS = kefir.fromEvents(
-        read(__dirname + '/story.txt', 'utf-8'),
-        'data')
-    readS
-        .log('reading')
-        .flatMap(aliceEncrypt)
-        .flatMap(bobDecrypt)
-        .flatMap(bobEncrypt)
-        .flatMap(aliceDecrypt)
-        .flatMap(aliceEncrypt)
-        .flatMap(bobDecrypt)
-        .flatMap(bobEncrypt)
-        .flatMap(aliceDecrypt)
-        .flatMap(aliceEncrypt)
-        .flatMap(bobDecrypt)
-        .flatMap(bobEncrypt)
-        .flatMap(aliceDecrypt)
-        .map(x => new Buffer.from(x).toString('utf-8'))
-        .log('decrypting')
+    read(__dirname + '/story.txt', 'utf-8')
+        .pipe(alice.encrypt)
+        .pipe(bob.decrypt)
+        .pipe(bob.encrypt)
+        .pipe(alice.decrypt)
+        .on('data', d => {
+            let pt = new Buffer.from(d).toString('utf-8')
+            console.log(pt)
+        })
+        .on('error', err => console.log('err', err))
 }

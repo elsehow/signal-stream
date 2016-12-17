@@ -1,6 +1,6 @@
-# empty-module
+# signal-duplex-stream
 
-description
+WIP
 
 <!-- see [details.md](details.md). -->
 

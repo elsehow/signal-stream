@@ -43,17 +43,22 @@ function echo ([aliceCipher, bobCipher]) {
     let bob = require('..')(bobCipher)
 
     console.log('starting')
-    let pushPromise = (p, next) => p.then(x => next(null, x), next)
-    let streamF = f => through.obj((buf, enc, next) => pushPromise(f(buf), next))
 
-    read(__dirname + '/story.txt', 'utf-8')
+    read(__dirname + '/story.txt')//, 'utf-8')
+        .pipe(through(function (buf, enc, next) {
+            let amt = 200
+            for (let i=0; i<buf.length; i+=amt)
+                this.push(buf.slice(i, i+amt))
+            next()
+        }))
         .pipe(alice.encrypt)
         .pipe(bob.decrypt)
-        // .pipe(bob.encrypt)
-        // .pipe(alice.decrypt)
-        .on('data', ds => ds.map(d => {
+        .pipe(bob.encrypt)
+        .pipe(alice.decrypt)
+        .on('data', d => {
             let pt = new Buffer.from(d).toString('utf-8')
-            console.log('SEE', d, pt)
-        }))
+            console.log(pt)
+        })
+
         .on('error', err => console.log('err', err))
 }

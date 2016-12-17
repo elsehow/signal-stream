@@ -8,23 +8,17 @@ let streamF = f => through.obj((buf, enc, next) => pushPromise(f(buf), next))
 
 function encryptor (cipher) {
     return function (plaintext) {
-        return Promise.all([
-            cipher.encrypt(plaintext.slice(0, 200)),
-            cipher.encrypt(plaintext.slice(201, 400)),
-        ])
+        return cipher.encrypt(plaintext)
     }
 }
 
 function decryptor (cipher) {
     // returns a promise of plaintext
-    function dec (ciphertext) {
+    return function (ciphertext) {
         // console.log('ciphertext to decrypt is', ciphertext)
         if (ciphertext.type == PREKEY_BUNDLE_CODE)
             return cipher.decryptPreKeyWhisperMessage(ciphertext.body, 'binary')
         return cipher.decryptWhisperMessage(ciphertext.body, 'binary')
-    }
-    return function (ctxts) {
-        return Promise.all(ctxts.map(dec))
     }
 }
 

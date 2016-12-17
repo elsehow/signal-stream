@@ -11,6 +11,7 @@
     "tape": "^4.5.1"
   },
   "dependencies": {
+    "kefir": "^3.6.1",
     "signal-protocol": "0.0.4",
     "through2": "^2.0.3"
   }

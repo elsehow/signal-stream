@@ -4,9 +4,12 @@ let l = require('./helpers')
 // var textsecure = require('signal-protocol/test/temp_helpers')
 const PREKEY_BUNDLE_CODE = 3 //textsecure.protobuf.IncomingPushMessageSignal.Type.PREKEY_BUNDLE
 
+const kefir = require('kefir')
+
 function encryptable (cipher, enc) {
     return function (plaintext) {
-        return cipher.encrypt(plaintext, enc)
+        return kefir.fromPromise(
+            cipher.encrypt(plaintext, enc))
     }
 }
 
@@ -19,7 +22,7 @@ function decryptable (cipher) {
         return cipher.decryptWhisperMessage(ciphertext.body, 'binary')
     }
     return function (ctxt) {
-        return parse(ctxt)
+        return kefir.fromPromise(parse(ctxt))
     }
 }
 

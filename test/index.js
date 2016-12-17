@@ -51,6 +51,10 @@ function echo ([aliceCipher, bobCipher]) {
         .then(aliceDecrypt)
         .then(aliceEncrypt)
         .then(bobDecrypt)
+        .then(bobEncrypt)
+        .then(aliceDecrypt)
+        .then(aliceEncrypt)
+        .then(bobDecrypt)
         .then(log('DATA:'))
         .catch(log('ERR:'))
 

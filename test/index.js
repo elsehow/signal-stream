@@ -1,33 +1,11 @@
 var signalstream = require('..')
-var helpers = require('./helpers')
+var bobAliceSessionCiphers = require('./helpers')
 var signal = require('signal-protocol')
 var read = require('fs').createReadStream
 var through = require('through2')
+var test = require('tape')
 
 var l = require('../src/helpers')
-
-var ALICE_ADDRESS = new signal.SignalProtocolAddress("+14151111111", 1);
-var BOB_ADDRESS   = new signal.SignalProtocolAddress("+14152222222", 1);
-
-var aliceStore = new helpers.SignalStore();
-var bobStore = new helpers.SignalStore();
-
-var bobPreKeyId = 1337;
-var bobSignedKeyId = 1;
-
-Promise.all([
-    helpers.generateIdentity(aliceStore),
-    helpers.generateIdentity(bobStore),
-]).then(function() {
-    return helpers.generatePreKeyBundle(bobStore, bobPreKeyId, bobSignedKeyId);
-}).then(function(preKeyBundle) {
-    var builder = new signal.SessionBuilder(aliceStore, BOB_ADDRESS);
-    return builder.processPreKey(preKeyBundle)
-}).then(function () {
-    var aliceSessionCipher = new signal.SessionCipher(aliceStore, BOB_ADDRESS);
-    var bobSessionCipher = new signal.SessionCipher(bobStore, ALICE_ADDRESS);
-    return [ aliceSessionCipher, bobSessionCipher ]
-}).then(echo, log)
 
 function log (note) {
     return function (x) {
@@ -36,29 +14,63 @@ function log (note) {
     }
 }
 
-// // // the world's slowest impl of `echo`
-function echo ([aliceCipher, bobCipher]) {
+function roundTripEcho (path, cb) {
 
-    let alice = require('..')(aliceCipher)
-    let bob = require('..')(bobCipher)
+    bobAliceSessionCiphers()
+        .then(echo, log('ERR'))
 
-    console.log('starting')
-
-    read(__dirname + '/story.txt')//, 'utf-8')
-        .pipe(through(function (buf, enc, next) {
-            let amt = 200
-            for (let i=0; i<buf.length; i+=amt)
-                this.push(buf.slice(i, i+amt))
-            next()
-        }))
-        .pipe(alice.encrypt)
-        .pipe(bob.decrypt)
-        .pipe(bob.encrypt)
-        .pipe(alice.decrypt)
-        .on('data', d => {
-            let pt = new Buffer.from(d).toString('utf-8')
-            console.log(pt)
-        })
-
-        .on('error', err => console.log('err', err))
+    // // // the world's slowest impl of `echo`
+    function echo ([aliceCipher, bobCipher]) {
+        let alice = require('..')(aliceCipher)
+        let bob = require('..')(bobCipher)
+        let concat = require('concat-stream')
+        read(path)
+            .pipe(through(function (buf, enc, next) {
+                let amt = 239
+                for (let i=0; i<buf.length; i+=amt)
+                    this.push(buf.slice(i, i+amt))
+                next()
+            }))
+            .pipe(alice.encrypt)
+            .pipe(bob.decrypt)
+            .pipe(bob.encrypt)
+            .pipe(alice.decrypt)
+            .pipe(through.obj((buff, enc, next) => {
+                let b = new Buffer(buff, enc)
+                next(null, b)
+            }))
+            .pipe(concat(cb))
+        // .on('data', d => console.log(d))
+            .on('error', err => console.log('err', err))
+    }
 }
+
+// test('can echo a short textfile from alice to bob to alice again', t => {
+//     let filepath = __dirname + '/story.txt'
+//     roundTripEcho(filepath, buff => {
+//         let trueBuff = require('fs').readFileSync(filepath)
+//         t.deepEqual(buff, trueBuff,
+//                     'textfile buffer after round trip encrypt/decrypt/encrypt/decrypt identical to original buffer')
+//         t.end()
+//     })
+// })
+
+// test('can echo long short textfile from alice to bob to alice again', t => {
+//     let filepath = __dirname + '/story2.txt'
+//     roundTripEcho(filepath, buff => {
+//         let trueBuff = require('fs').readFileSync(filepath)
+//         t.deepEqual(buff, trueBuff,
+//                     'long textfile buffer perserved after roundtrip')
+//         t.end()
+//     })
+// })
+
+test('can echo an image file', t => {
+    let filepath = __dirname + '/oakland-bridge.jpg'
+    roundTripEcho(filepath, buff => {
+        let trueBuff = require('fs').readFileSync(filepath)
+        t.deepEqual(buff, trueBuff,
+                    'long textfile buffer perserved after roundtrip')
+        t.end()
+    })
+})

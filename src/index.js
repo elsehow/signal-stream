@@ -4,10 +4,6 @@ let through = require('through2')
 // const CIPHERTEXT_CODE = textsecure.protobuf.IncomingPushMessageSignal.Type.CIPHERTEXT
 const PREKEY_BUNDLE_CODE = 3 //textsecure.protobuf.IncomingPushMessageSignal.Type.PREKEY_BUNDLE
 
-function ab2str (buf) {
-    return String.fromCharCode.apply(null, new Uint16Array(buf));
-}
-
 function str2ab (str) {
     var buf = new ArrayBuffer(str.length*2); // 2 bytes for each char
     var bufView = new Uint16Array(buf);
@@ -52,19 +48,26 @@ function unpad (paddedPlaintext) {
 }
 
 function encryptable (cipher) {
-    // return through.obj(function (buff, enc, next) {
     return through.obj(function (buff, enc, next) {
+        // if (enc !== 'buffer')
+        //     throw 'Must feed buffer to encryptable!'
+        console.log('"encryptable" input enc:', enc)
         // let ab = pad(buff.buffer)
         // console.log('padded', ab)
         // console.log('unpadded', buff.buffer)
+        // TODO this is a weird thing to do
+        //      coincidentally, it works whether `buff` is buffers or string
         let inefficientAb = pad(str2ab(buff.toString()))
         // console.log('stringed to arraybuff', inefficientAb)
+        // let inefficientUnpaddedAb = str2ab(buff.toString())
+        // console.log('my ab', inefficientUnpaddedAb)
         cipher
             // .encrypt(ab)
             // .encrypt(buff.buffer)
             .encrypt(inefficientAb)
-            .then(ctxt => next(null, ctxt))
-            .catch(next)
+            // .encrypt(inefficientUnpaddedAb)
+            .then(ctxt => next(null, ctxt),
+                  err => next(err))
     })
 }
 
@@ -80,12 +83,9 @@ function decryptable (cipher) {
     return through.obj(function (ctxt, enc, next) {
         return parse(ctxt)
             .then(unpad)
-            .then(ab2str)
-            .then(plaintext => {
-                // console.log('HI! I am getting', plaintext)
-                next(null, plaintext)   
-            })
-            .catch(next)
+            // .then(ab2str)
+            .then(plaintext => next(null, plaintext),
+                  err => next(err))
     })
 }
 

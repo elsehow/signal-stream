@@ -6,6 +6,10 @@ let through = require('through2')
 
 let log = note => x => console.log(note, x)
 
+function ab2str (buf) {
+    return String.fromCharCode.apply(null, new Uint16Array(buf));
+}
+
 var ALICE_ADDRESS = new signal.SignalProtocolAddress("+14151111111", 1);
 var BOB_ADDRESS   = new signal.SignalProtocolAddress("+14152222222", 1);
 
@@ -58,16 +62,16 @@ function echo ([aliceCipher, bobCipher]) {
     let dir = __dirname + '/story.txt'
     console.log('starting')
     read(dir)
-        .pipe(aliceEncrypt)
+        .pipe(through.obj(function (buff, enc, next) {
+            next(null, buff.toString())
+        }))
+        .pipe(aliceEncrypt)    // alice to bob
         .pipe(bobDecrypt)
-        .pipe(bobEncrypt)
+        .pipe(bobEncrypt)      // bob back to alice
         .pipe(aliceDecrypt)
-        .pipe(aliceEncrypt)
+        .pipe(aliceEncrypt)     // alice back to bob
         .pipe(bobDecrypt)
-        .pipe(bobEncrypt)
-        .pipe(aliceDecrypt)
-        .on('data', d => console.log('DATA', d))
+        .on('data', d => console.log('DATA',d))
         .on('error', e => console.log('ERR!', e))
-        // .pipe(process.stdout)
-        // .pipe(decrypt)
+    // .pipe(bobDecrypt)
 }

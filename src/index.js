@@ -13,7 +13,7 @@ function encryptable (cipher, enc) {
 function decryptable (cipher) {
     // returns a promise of plaintext
     function parse (ciphertext) {
-        console.log('ciphertext to decrypt is', ciphertext)
+        // console.log('ciphertext to decrypt is', ciphertext)
         if (ciphertext.type == PREKEY_BUNDLE_CODE)
             return cipher.decryptPreKeyWhisperMessage(ciphertext.body, 'binary')
         return cipher.decryptWhisperMessage(ciphertext.body, 'binary')

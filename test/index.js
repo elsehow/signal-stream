@@ -1,6 +1,9 @@
 var signalstream = require('..')
 var helpers = require('./helpers')
 var signal = require('signal-protocol')
+var read = require('fs').createReadStream
+var through = require('through2')
+var util = require('signal-protocol/src/helpers.js')
 
 var l = require('../src/helpers')
 
@@ -35,7 +38,6 @@ function log (note) {
     }
 }
 
-
 // // // the world's slowest impl of `echo`
 function echo ([aliceCipher, bobCipher]) {
 
@@ -50,16 +52,59 @@ function echo ([aliceCipher, bobCipher]) {
         .decryptable(bobCipher)
 
     console.log('starting')
-    let ctxt = aliceEncrypt(new Buffer('hello sweet world', 'utf-8'))
-        .then(bobDecrypt)
-        .then(bobEncrypt)
-        .then(aliceDecrypt)
-        .then(aliceEncrypt)
-        .then(bobDecrypt)
-        .then(bobEncrypt)
-        .then(aliceDecrypt)
-        .then(aliceEncrypt)
-        .then(bobDecrypt)
-        .then(x => new Buffer.from(x).toString('utf-8'))
-        .then(log('DATA:'), log('ERR!!'))
+    let pushPromise = (p, next) => p.then(x => next(null, x), next)
+    read(__dirname + '/story.txt', 'utf-8')
+        .pipe(through.obj(function (buf, enc, next) {
+            pushPromise(
+                aliceEncrypt(buf),
+                next)
+        }))
+        .pipe(through.obj(function (buf, enc, next) {
+            pushPromise(
+                bobDecrypt(buf),
+                next)
+        }))
+        .pipe(through.obj(function (buf, enc, next) {
+            pushPromise(
+                bobEncrypt(buf),
+                next)
+        }))
+        .pipe(through.obj(function (buf, enc, next) {
+            pushPromise(
+                aliceDecrypt(buf),
+                next)
+        }))
+        .pipe(through.obj(function (buf, enc, next) {
+            pushPromise(
+                aliceEncrypt(buf),
+                next)
+        }))
+        .pipe(through.obj(function (buf, enc, next) {
+            pushPromise(
+                bobDecrypt(buf),
+                next)
+        }))
+        .on('data', x => {
+            log('DATA')(x)
+            log('DATA')(new Buffer.from(x).toString('utf-8'))
+        })
+        .on('error', log('ERR'))
+        // .pipe(process.stdout)
+    // let startBuff = new Buffer('hello sweet world', 'utf-8')
+    // let ctxt = aliceEncrypt(startBuff)
+    //     .then(bobDecrypt)
+    //     .then(bobEncrypt)
+    //     .then(aliceDecrypt)
+    //     .then(aliceEncrypt)
+    //     .then(bobDecrypt)
+    //     .then(bobEncrypt)
+    //     .then(aliceDecrypt)
+    //     .then(aliceEncrypt)
+    //     .then(bobDecrypt)
+    //     .then(bobEncrypt)
+    //     .then(aliceDecrypt)
+    //     .then(aliceEncrypt)
+    //     .then(bobDecrypt)
+    //     .then(x => new Buffer.from(x).toString('utf-8'))
+    //     .then(log('DATA:'), log('ERR!!'))
 }

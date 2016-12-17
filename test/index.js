@@ -1,7 +1,7 @@
 var signalstream = require('..')
 var helpers = require('./helpers')
 var signal = require('signal-protocol')
-
+let read = require('fs').ReadStream
 
 let log = note => x => console.log(note, x)
 
@@ -45,19 +45,22 @@ function echo ([aliceCipher, bobCipher]) {
     let bobDecrypt = require('..')
         .decryptable(bobCipher)
 
-    let ctxt = aliceEncrypt('hello sweet world')
-        .then(bobDecrypt)
-        .then(bobEncrypt)
-        .then(aliceDecrypt)
-        .then(aliceEncrypt)
-        .then(bobDecrypt)
-        .then(log('DATA:'))
-        .catch(log('ERR:'))
+    // let ctxt = aliceEncrypt('hello sweet world')
+    //     .then(bobDecrypt)
+    //     .then(bobEncrypt)
+    //     .then(aliceDecrypt)
+    //     .then(aliceEncrypt)
+    //     .then(bobDecrypt)
+    //     .then(log('DATA:'))
+    //     .catch(log('ERR:'))
 
-    // console.log(ptxt)
-    // process.stdin
-    //     .pipe(encrypt)
-    //     .pipe(decrypt)
-    //     .on('data', d => console.log(d))
-    // //.pipe(process.stdout)
+    let dir = __dirname + '/story.txt'
+    console.log('starting')
+    read(dir)
+        .pipe(aliceEncrypt)
+        .pipe(bobDecrypt)
+        .on('data', d => console.log('DATA', d))
+        .on('error', e => console.log('ERR!', e))
+        // .pipe(process.stdout)
+        // .pipe(decrypt)
 }

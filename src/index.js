@@ -4,11 +4,11 @@ let through = require('through2')
 // const CIPHERTEXT_CODE = textsecure.protobuf.IncomingPushMessageSignal.Type.CIPHERTEXT
 const PREKEY_BUNDLE_CODE = 3 //textsecure.protobuf.IncomingPushMessageSignal.Type.PREKEY_BUNDLE
 
-function ab2str(buf) {
+function ab2str (buf) {
     return String.fromCharCode.apply(null, new Uint16Array(buf));
 }
 
-function str2ab(str) {
+function str2ab (str) {
     var buf = new ArrayBuffer(str.length*2); // 2 bytes for each char
     var bufView = new Uint16Array(buf);
     for (var i=0, strLen=str.length; i<strLen; i++) {
@@ -16,7 +16,7 @@ function str2ab(str) {
     }
     return buf;
 }
-function getPaddedMessageLength(messageLength) {
+function getPaddedMessageLength (messageLength) {
     let messageLengthWithTerminator = messageLength + 1
     let messagePartCount            = Math.floor(messageLengthWithTerminator / 160)
     if (messageLengthWithTerminator % 160 !== 0) {
@@ -35,7 +35,7 @@ function pad (plaintext) {
     return paddedPlaintext.buffer;
 }
 
-function unpad(paddedPlaintext) {
+function unpad (paddedPlaintext) {
     paddedPlaintext = new Uint8Array(paddedPlaintext);
     let plaintext;
     for (let i = paddedPlaintext.length - 1; i >= 0; i--) {
@@ -53,11 +53,19 @@ function unpad(paddedPlaintext) {
 
 function encryptable (cipher) {
     // return through.obj(function (buff, enc, next) {
-    return function (plaintext) {
-        let buff = pad(str2ab(plaintext))
-        // console.log('buff', buff)
-        return cipher.encrypt(buff)
-    }
+    return through.obj(function (buff, enc, next) {
+        // let ab = pad(buff.buffer)
+        // console.log('padded', ab)
+        // console.log('unpadded', buff.buffer)
+        let inefficientAb = pad(str2ab(buff.toString()))
+        // console.log('stringed to arraybuff', inefficientAb)
+        cipher
+            // .encrypt(ab)
+            // .encrypt(buff.buffer)
+            .encrypt(inefficientAb)
+            .then(ctxt => next(null, ctxt)
+                  , err => next(err, null))
+    })
 }
 
 function decryptable (cipher) {
@@ -69,19 +77,13 @@ function decryptable (cipher) {
         return cipher.decryptWhisperMessage(ciphertext.body, 'binary')
     }
     // return through.obj(function (ctxt, enc, next) {
-    return function (ctxt) {
+    return through.obj(function (ctxt, enc, next) {
         return parse(ctxt)
             .then(unpad)
             .then(ab2str)
-            //.catch(err => console.log(err)) 
-            // .then(plaintext => {
-            //     console.log('DECRYPTED', plaintext)
-            //     // this.push(plaintext)
-            //     next()
-            // })
-            // .catch(err => console.log('ERR!', err))
-    // })
-    }
+            .then(plaintext => next(null, plaintext)
+                  , err => next(err, null))
+    })
 }
 
 // console.log(decode.toString())

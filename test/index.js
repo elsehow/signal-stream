@@ -53,39 +53,19 @@ function echo ([aliceCipher, bobCipher]) {
 
     console.log('starting')
     let pushPromise = (p, next) => p.then(x => next(null, x), next)
+    let streamF = f => through.obj(function (buf, enc, next) { pushPromise(f(buf), next) })
+
+    let aliceEnc = streamF(aliceEncrypt)
+    let bobDec = streamF(bobDecrypt)
+
     read(__dirname + '/story.txt', 'utf-8')
-        .pipe(through.obj(function (buf, enc, next) {
-            pushPromise(
-                aliceEncrypt(buf),
-                next)
-        }))
-        .pipe(through.obj(function (buf, enc, next) {
-            pushPromise(
-                bobDecrypt(buf),
-                next)
-        }))
-        .pipe(through.obj(function (buf, enc, next) {
-            pushPromise(
-                bobEncrypt(buf),
-                next)
-        }))
-        .pipe(through.obj(function (buf, enc, next) {
-            pushPromise(
-                aliceDecrypt(buf),
-                next)
-        }))
-        .pipe(through.obj(function (buf, enc, next) {
-            pushPromise(
-                aliceEncrypt(buf),
-                next)
-        }))
-        .pipe(through.obj(function (buf, enc, next) {
-            pushPromise(
-                bobDecrypt(buf),
-                next)
-        }))
+        .pipe(streamF(aliceEncrypt))
+        .pipe(streamF(bobDecrypt))
+        .pipe(streamF(bobEncrypt))
+        .pipe(streamF(aliceDecrypt))
+        .pipe(streamF(aliceEncrypt))
+        .pipe(streamF(bobDecrypt))
         .on('data', x => {
-            log('DATA')(x)
             log('DATA')(new Buffer.from(x).toString('utf-8'))
         })
         .on('error', log('ERR'))

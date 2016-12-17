@@ -63,26 +63,29 @@ function encryptable (cipher) {
             // .encrypt(ab)
             // .encrypt(buff.buffer)
             .encrypt(inefficientAb)
-            .then(ctxt => next(null, ctxt)
-                  , err => next(err, null))
+            .then(ctxt => next(null, ctxt))
+            .catch(next)
     })
 }
 
 function decryptable (cipher) {
     // returns a promise of plaintext
     function parse (ciphertext) {
-        // console.log('SEEING\n', ciphertext, '\n\n')
+        // console.log('SEEING\n', ciphertext)
         if (ciphertext.type == PREKEY_BUNDLE_CODE)
             return cipher.decryptPreKeyWhisperMessage(ciphertext.body, 'binary')
+        // console.log('REACHED!', ciphertext)
         return cipher.decryptWhisperMessage(ciphertext.body, 'binary')
     }
-    // return through.obj(function (ctxt, enc, next) {
     return through.obj(function (ctxt, enc, next) {
         return parse(ctxt)
             .then(unpad)
             .then(ab2str)
-            .then(plaintext => next(null, plaintext)
-                  , err => next(err, null))
+            .then(plaintext => {
+                // console.log('HI! I am getting', plaintext)
+                next(null, plaintext)   
+            })
+            .catch(next)
     })
 }
 

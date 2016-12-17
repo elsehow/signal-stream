@@ -2,6 +2,7 @@ var signalstream = require('..')
 var helpers = require('./helpers')
 var signal = require('signal-protocol')
 let read = require('fs').ReadStream
+let through = require('through2')
 
 let log = note => x => console.log(note, x)
 
@@ -59,6 +60,12 @@ function echo ([aliceCipher, bobCipher]) {
     read(dir)
         .pipe(aliceEncrypt)
         .pipe(bobDecrypt)
+        .pipe(bobEncrypt)
+        .pipe(aliceDecrypt)
+        .pipe(aliceEncrypt)
+        .pipe(bobDecrypt)
+        .pipe(bobEncrypt)
+        .pipe(aliceDecrypt)
         .on('data', d => console.log('DATA', d))
         .on('error', e => console.log('ERR!', e))
         // .pipe(process.stdout)

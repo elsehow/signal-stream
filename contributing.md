@@ -9,6 +9,7 @@ clone this repository, then
 
 now you can edit js files in src/ and test/ - tests will automatically re-run
 
-## todo
+## TODO 
 
-development priorities here
+- [ ] why do i keep getting new remote ephemeral keys?
+- [ ] pad / unpad plaintext / ciphertext?

@@ -2,8 +2,7 @@ var signalstream = require('..')
 var helpers = require('./helpers')
 var signal = require('signal-protocol')
 
-
-let log = note => x => console.log(note, x)
+var l = require('../src/helpers')
 
 var ALICE_ADDRESS = new signal.SignalProtocolAddress("+14151111111", 1);
 var BOB_ADDRESS   = new signal.SignalProtocolAddress("+14152222222", 1);
@@ -27,9 +26,14 @@ Promise.all([
     var aliceSessionCipher = new signal.SessionCipher(aliceStore, BOB_ADDRESS);
     var bobSessionCipher = new signal.SessionCipher(bobStore, ALICE_ADDRESS);
     return [ aliceSessionCipher, bobSessionCipher ]
-}).then(echo)
-    .catch(log)
+}).then(echo, log)
 
+function log (note) {
+    return function (x) {
+        console.log(note, x)
+        return x
+    }
+}
 
 
 // // // the world's slowest impl of `echo`
@@ -45,7 +49,8 @@ function echo ([aliceCipher, bobCipher]) {
     let bobDecrypt = require('..')
         .decryptable(bobCipher)
 
-    let ctxt = aliceEncrypt('hello sweet world')
+    console.log('starting')
+    let ctxt = aliceEncrypt(new Buffer('hello sweet world', 'utf-8'))
         .then(bobDecrypt)
         .then(bobEncrypt)
         .then(aliceDecrypt)
@@ -55,13 +60,6 @@ function echo ([aliceCipher, bobCipher]) {
         .then(aliceDecrypt)
         .then(aliceEncrypt)
         .then(bobDecrypt)
-        .then(log('DATA:'))
-        .catch(log('ERR:'))
-
-    // console.log(ptxt)
-    // process.stdin
-    //     .pipe(encrypt)
-    //     .pipe(decrypt)
-    //     .on('data', d => console.log(d))
-    // //.pipe(process.stdout)
+        .then(x => new Buffer.from(x).toString('utf-8'))
+        .then(log('DATA:'), log('ERR!!'))
 }

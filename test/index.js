@@ -49,11 +49,11 @@ function echo ([aliceCipher, bobCipher]) {
     read(__dirname + '/story.txt', 'utf-8')
         .pipe(alice.encrypt)
         .pipe(bob.decrypt)
-        .pipe(bob.encrypt)
-        .pipe(alice.decrypt)
-        .on('data', d => {
+        // .pipe(bob.encrypt)
+        // .pipe(alice.decrypt)
+        .on('data', ds => ds.map(d => {
             let pt = new Buffer.from(d).toString('utf-8')
-            console.log(pt)
-        })
+            console.log('SEE', d, pt)
+        }))
         .on('error', err => console.log('err', err))
 }

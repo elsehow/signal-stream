@@ -23,7 +23,7 @@ function log (note) {
 //     next()
 // }))
 
-function roundTripEcho (str, cb) {
+function roundTripEcho (buf, cb) {
 
     bobAliceSessionCiphers()
         .then(echo, log('ERR'))
@@ -32,28 +32,18 @@ function roundTripEcho (str, cb) {
     function echo ([aliceCipher, bobCipher]) {
         let alice = require('..')(aliceCipher)
         let bob = require('..')(bobCipher)
-        // spigot([str])
-        //         .pipe(alice.encrypt)
-        //         .pipe(bob.decrypt)
-        //         // .pipe(bob.encrypt)
-        //         // .pipe(alice.decrypt)
-        //         .pipe(concat(cb))
-        //         .on('error', err => console.log('err', err))
-        // // })
-        // //     .pipe(concat(cb))
-        // //     // .on('data', d => console.log(d))
 
-
-
-        // TODO this simple example works in the browser
-        //      but breaks in node
-        alice.encrypt(str)
-            .then(bob.decrypt)
-            .then(cb)
+        spigot([buf])
+        .pipe(alice.encrypt)
+        .pipe(bob.decrypt)
+        .pipe(bob.encrypt)
+        .pipe(alice.decrypt)
+        .pipe(concat(cb))
+        .on('error', err => console.log('err', err))
     }
 }
 
-test('can echo a short textfile from alice to bob to alice again', t => {
+test('can echo a long textfile from alice to bob to alice again', t => {
     var str = require('./story2.js')
     roundTripEcho(str, recoveredBuff => {
         t.deepEqual(str, recoveredBuff.toString(),
@@ -62,22 +52,12 @@ test('can echo a short textfile from alice to bob to alice again', t => {
     })
 })
 
-// test('can echo long short textfile from alice to bob to alice again', t => {
-//     let filepath = __dirname + '/story2.txt'
-//     roundTripEcho(filepath, buff => {
-//         let trueBuff = require('fs').readFileSync(filepath)
-//         t.deepEqual(buff, trueBuff,
-//                     'long textfile buffer perserved after roundtrip')
-//         t.end()
-//     })
-// })
-
-// test('can echo an image file', t => {
-//     let filepath = __dirname + '/oakland-bridge.jpg'
-//     roundTripEcho(filepath, buff => {
-//         let trueBuff = require('fs').readFileSync(filepath)
-//         t.deepEqual(buff, trueBuff,
-//                     'long textfile buffer perserved after roundtrip')
-//         t.end()
-//     })
-// })
+test('can echo an image file', t => {
+    let filepath = __dirname + '/oakland-bridge.jpg'
+    let trueBuf = require('fs').readFileSync(filepath)
+    roundTripEcho(trueBuf, buff => {
+        t.deepEqual(buff, trueBuf,
+                    'long textfile buffer perserved after roundtrip')
+        t.end()
+    })
+})

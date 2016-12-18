@@ -38,9 +38,9 @@ function decryptor (cipher) {
 
 module.exports = function (cipher) {
     return {
-        // encrypt: streamF(encryptor(cipher)),
-        // decrypt: streamF(decryptor(cipher)),
-        encrypt: encryptor(cipher),
-        decrypt: decryptor(cipher),
+        encrypt: streamF(encryptor(cipher)),
+        decrypt: streamF(decryptor(cipher)),
+        //encrypt: encryptor(cipher),
+        //decrypt: decryptor(cipher),
     }
 }

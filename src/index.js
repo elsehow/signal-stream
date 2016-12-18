@@ -16,13 +16,13 @@ let streamF = f => {
 }
 
 function encryptor (cipher) {
-    return function (plaintext, enc) {
-        return cipher.encrypt(plaintext, enc)//'binary')
+    return function (plaintext) {
+        return cipher.encrypt(plaintext)
     }
 }
 
 function decryptor (cipher) {
-    return function (ab) {
+    function bufferify (ab) {
         let b = new Buffer(ab)
         return b
     }

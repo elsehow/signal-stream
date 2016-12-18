@@ -52,13 +52,18 @@ test('can replicate a hyperlog over a signal transform stream', t => {
 
                 aliceReplication
                     .pipe(through(function (buf,enc,next) {
-                        new Promise(function (resolve) {
-                            resolve(buf)
-                        }).then(function (b) {
-                            console.log('seeing', b)
-                            console.log('equal?', b.equals(buf))
-                            next(null, b)
-                        })
+//                        new Promise(function (resolve) {
+//                            resolve(buf)
+//                        }).then(function (b) {
+//                          next(null, buf)
+//                        })
+alice.encrypt(buf)
+.then(bob.decrypt)
+.then(pt => next(null, pt))
+                            //console.log('seeing', b)
+                            //console.log('equal?', b.equals(buf))
+                           // next(null, b)
+                        //})
                     }))
                             // callback(null, buf)
                             // .catch(err => console.log('ERR', err))

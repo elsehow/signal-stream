@@ -51,51 +51,10 @@ test('can replicate a hyperlog over a signal transform stream', t => {
                 // var map = require('through2-map-promise')
 
                 aliceReplication
-                    .pipe(through(function (buf,enc,next) {
-//                        new Promise(function (resolve) {
-//                            resolve(buf)
-//                        }).then(function (b) {
-//                          next(null, buf)
-//                        })
-alice.encrypt(buf)
-.then(bob.decrypt)
-.then(pt => next(null, pt))
-                            //console.log('seeing', b)
-                            //console.log('equal?', b.equals(buf))
-                           // next(null, b)
-                        //})
-                    }))
-                            // callback(null, buf)
-                            // .catch(err => console.log('ERR', err))
-                        // console.log('before cb', buf)
-                        // callback(null, buf)
+                    .pipe(alice.encrypt)
+                    .pipe(bob.decrypt)
                     .pipe(bobReplication)
                     .pipe(aliceReplication)
-                        // console.log(buf)
-                        // callback(null, buf)
-                        // es.map(function (buf, callback) {
-                        // alice.encrypt(buf)
-                        //     .then(bob.decrypt)
-                        //     .then(b => {
-                        //         callback(null, b)
-                        //     })
-                    // }))
-                    // .pipe(through.obj(function (buf, enc, next) {
-                    //     console.log('now i see', buf)
-                    //     this.push(buf)
-                    //     next()
-                    // }))
-                    // .pipe(alice.encrypt)
-                // ciphertext only here
-                // we could send this stream over a snoopable channel
-                // but let's just pretend we've done that,
-                // and decrypt the stream on bob's side
-                    // .pipe(bob.decrypt)
-                    // .pipe(bobReplication)
-                    // .pipe(bob.encrypt)
-                    // .pipe(alice.decrypt)
-                    // .pipe(aliceReplication)
-                // console.log('started them replicating through encrypted channel')
             })
         })
     }

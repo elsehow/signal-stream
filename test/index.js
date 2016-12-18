@@ -45,25 +45,28 @@ test('can replicate a hyperlog over a signal transform stream', t => {
                       'bob gets a `beep` after replicating')
 
                 // var map = reqire('map-stream')
-                // var es = require('event-stream')
+                var es = require('event-stream')
                 // var streamFromPromise = require('stream-from-promise')
                 // var flatmap = require('flat-map')
                 // var map = require('through2-map-promise')
 
                 aliceReplication
-                    .pipe(through(function (buf,enc,next) {
-                        new Promise(function (resolve) {
-                            resolve(buf)
-                        }).then(function (b) {
-                            console.log('seeing', b)
-                            console.log('equal?', b.equals(buf))
-                            next(null, b)
-                        })
+                    .pipe(es.map(function (buf,next) {
+                        // fails (always)
+                        alice.encrypt(buf)
+                            .then(bob.decrypt)
+                            .then(p => {
+                                // console.log(p.equals(buf))
+                                next(null, buf)
+                            })
+                        // passes (only in browser)
+                        // new Promise(res => res(buf))
+                        //     .then(buff => next(null, buf))
+                        // passes (always)
+                        // next(null, buf)
                     }))
-                            // callback(null, buf)
-                            // .catch(err => console.log('ERR', err))
-                        // console.log('before cb', buf)
-                        // callback(null, buf)
+                    // .pipe(alice.encrypt)
+                    // .pipe(alice.decrypt)
                     .pipe(bobReplication)
                     .pipe(aliceReplication)
                         // console.log(buf)

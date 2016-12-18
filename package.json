@@ -16,6 +16,7 @@
     "tape": "^4.5.1"
   },
   "dependencies": {
+    "event-stream": "^3.3.4",
     "flat-map": "^0.4.0",
     "map-stream": "0.0.6",
     "signal-protocol": "0.0.4",

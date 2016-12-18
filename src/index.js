@@ -22,7 +22,7 @@ function encryptor (cipher) {
 }
 
 function decryptor (cipher) {
-    return function (ab) {
+    function bufferify (ab) {
         let b = new Buffer(ab)
         return b
     }

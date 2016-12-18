@@ -3,7 +3,7 @@
   "license": "BSD-3-Clause",
   "main": "src/index.js",
   "scripts": {
-    "test": "tape test/echoTest.js",
+    "test": "tape test/index.js",
     "watch": "runwatch \"**/*.js\" -r \"npm test\""
   },
   "devDependencies": {
@@ -16,7 +16,11 @@
     "tape": "^4.5.1"
   },
   "dependencies": {
+    "flat-map": "^0.4.0",
+    "map-stream": "0.0.6",
     "signal-protocol": "0.0.4",
-    "through2": "^2.0.3"
+    "stream-from-promise": "^1.0.0",
+    "through2": "^2.0.3",
+    "through2-map-promise": "^1.0.0"
   }
 }

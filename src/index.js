@@ -22,19 +22,17 @@ function encryptor (cipher) {
 }
 
 function decryptor (cipher) {
-    function bufferify (enc) {
-        return function (ab) {
-            let b = new Buffer(ab)
-            return b
-        }
+    return function (ab) {
+        let b = new Buffer(ab)
+        return b
     }
     // returns a promise of plaintext
     return function (ciphertext, enc) {
         if (ciphertext.type == PREKEY_BUNDLE_CODE)
             return cipher.decryptPreKeyWhisperMessage(ciphertext.body, 'binary')
-            .then(bufferify(enc))
+            .then(bufferify)
         return cipher.decryptWhisperMessage(ciphertext.body, 'binary')
-            .then(bufferify(enc))
+            .then(bufferify)
     }
 }
 

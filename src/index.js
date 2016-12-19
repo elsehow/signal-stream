@@ -1,9 +1,9 @@
 let signal = require('signal-protocol')
 let through = require('through2')
-// let l = require('./helpers')
-// var textsecure = require('signal-protocol/test/temp_helpers')
+let JSONStream = require('JSONStream')
 const PREKEY_BUNDLE_CODE = 3 //textsecure.protobuf.IncomingPushMessageSignal.Type.PREKEY_BUNDLE
-// let pushPromise = (p, next) => p.then(x => next(null, x), next)
+var pumpify = require('pumpify')
+
 
 function streamF (f) {
   return through.obj(function (buf, enc, next) {
@@ -27,7 +27,7 @@ function decryptor (cipher) {
     return b
   }
   // returns a promise of plaintext
-  return function (ciphertext, enc) {
+  return function (ciphertext) {
     if (ciphertext.type == PREKEY_BUNDLE_CODE)
       return cipher.decryptPreKeyWhisperMessage(ciphertext.body, 'binary')
       .then(bufferify)
@@ -36,15 +36,30 @@ function decryptor (cipher) {
   }
 }
 
-module.exports = function (cipher) {
+module.exports = function (cipher, opts={}) {
+
   let encryptF = encryptor(cipher)
   let decryptF = decryptor(cipher)
+
+  let encS = streamF(encryptF)
+  let decS = streamF(decryptF)
+
+  if (opts.jsonIn) {
+    // parse input before decyrpting
+    let parser = JSONStream.parse('*')
+    decS = pumpify(parser, decS)
+  }
+
+  if (opts.jsonOut) {
+    // stringifiy output after encrypting
+    let stringer = JSONStream.stringify()
+    encS = pumpify(encS, stringer)
+  }
+
   return {
-    encrypt: streamF(encryptF),
-    decrypt: streamF(decryptF),
+    encrypt: encS,
+    decrypt: decS,
     _encryptF: encryptF,
     _decryptF: decryptF,
-    //encrypt: encryptor(cipher),
-    //decrypt: decryptor(cipher),
   }
 }

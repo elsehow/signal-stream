@@ -1,0 +1,29 @@
+language: node_js
+dist: trusty
+node_js:
+- "7"
+- "6"
+- "5"
+# - "4"
+install:
+- npm install
+script:
+- grunt mochaTest
+# env:
+#   - CXX=clang
+# addons:
+#   apt:
+#     sources:
+#       - ubuntu-toolchain-r-test
+#       - llvm-toolchain-precise-3.6
+#     packages:
+#       - g++-4.8
+#       - llvm-3.6
+#       - libstdc++-4.9-dev
+#       - llvm-3.6-dev
+#       - clang-3.6
+
+# compiler: clang
+# os:
+  # - linux
+  # - osx

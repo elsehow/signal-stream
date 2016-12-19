@@ -77,7 +77,15 @@ function bobAliceSessionCiphers () {
     })
 }
 
-module.exports = bobAliceSessionCiphers
+function imageBuffer () {
+  let filepath = __dirname + '/oakland-bridge.jpg'
+  let trueBuf = require('fs').readFileSync(filepath)
+  return trueBuf
+}
+module.exports = {
+  imageBuffer,
+  bobAliceSessionCiphers,
+}
 //     generateIdentity: generateIdentity,
 //     generatePreKeyBundle: generatePreKeyBundle,
 //     SignalStore:SignalStore,

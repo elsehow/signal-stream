@@ -62,7 +62,7 @@ the default `opts` are
 }
 ```
 
-setting these to `true` can be helpful if you need to (de-)serialize the objects produced by signal-protocol's `encrypt`, e.g. to send over a websocket or a network. (see examples/net.js for an example).
+setting these to `true` can be helpful if you need to (de-)serialize the objects produced by signal-protocol's `encrypt`, e.g. to send over a websocket or a network. (see `examples/net.js`).
 
 ## license
 

@@ -45,17 +45,17 @@ see `examples/` for more.
 
 ## api
 
-### transforms = require('signal-stream')(sessionCipher, opts)
+### require('signal-stream')(sessionCipher, opts)
 
-produces two transforms, `transforms.encrypt` and `transforms.decrypt`.
+returns an object `{ encrypt, decrypt }`.
 
-`transform.encrypt` is a transform stream that takes buffers and produces signal-protocol ciphertext objects (refer to [signal-protocol](https://github.com/elsehow/signal-protocol) for details).
+`encrypt` is a transform stream that takes buffers and produces signal-protocol ciphertext objects (refer to [signal-protocol](https://github.com/elsehow/signal-protocol) for details).
 
-`transform.decrypt` is a transform stream that takes ciphertext objects and produces buffers.
+`decrypt` is a transform stream that takes ciphertext objects and produces buffers.
 
-the default options for `opts` are
+the default `opts` are
 
-```
+```js
 {
   jsonIn: false,
   jsonOut: false,

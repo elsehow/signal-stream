@@ -25,8 +25,8 @@ test('can replicate a hyperlog', function (t) {
   var bobLog = myLog()
   h.bobAliceSessionCiphers()
     .then(function (ciphers) {
-      let alice = signalstream(ciphers[0])
-      let bob = signalstream(ciphers[1])
+      var alice = signalstream(ciphers[0])
+      var bob = signalstream(ciphers[1])
 
       alice._encryptF('introducing!')
         .then(bob._decryptF)

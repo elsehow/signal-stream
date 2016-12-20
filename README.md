@@ -13,14 +13,14 @@ using the [signal-protocol](https://github.com/elsehow/signal-protocol)
 ## example
 
 ```javascript
-var sigstream = require('signal-stream')
+var signalstream = require('signal-stream')
 var signal = require('signal-protocol')
 var h = require('signal-stream/test/helpers')(signal)
 
 h.bobAliceSessionCiphers()
   .then(([aliceCipher, bobCipher]) => {
-    let alice = sigstream(aliceCipher)
-    let bob = sigstream(bobCipher)
+    let alice = signalstream(aliceCipher)
+    let bob = signalstream(bobCipher)
     require('http')
       .get({
         hostname:'info.cern.ch',
@@ -45,7 +45,7 @@ see `examples/` for more.
 
 ## api
 
-### require('signal-stream')(sessionCipher, opts)
+### signalstream(sessionCipher, opts)
 
 returns an object `{ encrypt, decrypt }`.
 

@@ -41,7 +41,7 @@ h.bobAliceSessionCiphers()
 // ...
 ```
 
-see examples/ for more.
+see `examples/` for more.
 
 ## api
 

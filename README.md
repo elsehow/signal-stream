@@ -13,14 +13,14 @@ using the [signal-protocol](https://github.com/elsehow/signal-protocol)
 ## example
 
 ```javascript
-var sigstream = require('signal-stream')
+var signalstream = require('signal-stream')
 var signal = require('signal-protocol')
 var h = require('signal-stream/test/helpers')(signal)
 
 h.bobAliceSessionCiphers()
   .then(([aliceCipher, bobCipher]) => {
-    let alice = sigstream(aliceCipher)
-    let bob = sigstream(bobCipher)
+    let alice = signalstream(aliceCipher)
+    let bob = signalstream(bobCipher)
     require('http')
       .get({
         hostname:'info.cern.ch',
@@ -35,33 +35,34 @@ h.bobAliceSessionCiphers()
               console.log(d.toString()))
       })
   })
+  
 // <HEADER>
 // <TITLE>The World Wide Web project</TITLE>
 // ...
 ```
 
-see examples/ for more.
+see `examples/` for more.
 
 ## api
 
-### transforms = require('signal-stream')(sessionCipher, opts)
+### signalstream(sessionCipher, opts)
 
-produces two transforms, `transforms.encrypt` and `transforms.decrypt`.
+returns an object `{ encrypt, decrypt }`.
 
-`transform.encrypt` is a transform stream that takes buffers and produces signal-protocol ciphertext objects (refer to [signal-protocol](https://github.com/elsehow/signal-protocol) for details).
+`encrypt` is a transform stream that consumes (plaintext) buffers and produces (encrypted) ciphertext objects (refer to [signal-protocol](https://github.com/elsehow/signal-protocol) for details).
 
-`transform.decrypt` is a transform stream that takes ciphertext objects and produces buffers.
+`decrypt` is a transform stream that consumes signal-protocol's ciphertext objects and produces plaintext buffers.
 
-the default options for `opts` are
+the default `opts` are
 
-```
+```js
 {
   jsonIn: false,
   jsonOut: false,
 }
 ```
 
-setting these to `true` can be helpful if you need to (de-)serialize the objects produced by signal-protocol's `encrypt`, e.g. to send over a websocket or a network. (see examples/net.js for an example).
+setting these to `true` can be helpful if you need to (de-)serialize the objects produced by signal-protocol's `encrypt`, e.g. to send over a websocket or a network. (see `examples/net.js`).
 
 ## license
 

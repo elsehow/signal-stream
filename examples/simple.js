@@ -1,19 +1,23 @@
-var spigot = require('stream-spigot')
-var h = require('../test/helpers')
+var sigstream = require('..')
+var signal = require('signal-protocol')
+var h = require('../test/helpers')(signal)
+
 h.bobAliceSessionCiphers()
- .then(([aliceCipher, bobCipher]) => {
+  .then(([aliceCipher, bobCipher]) => {
+    let alice = sigstream(aliceCipher)
+    let bob = sigstream(bobCipher)
+    require('http')
+      .get({
+        hostname:'info.cern.ch',
+        path: '/hypertext/WWW/TheProject.html',
+      }, res => {
+        res
+          .pipe(alice.encrypt)
+          .pipe(bob.decrypt)
+          .pipe(bob.encrypt)
+          .pipe(alice.decrypt)
+          .on('data', d =>
+              console.log(d.toString()))
+      })
+  })
 
-   let alice = require('..')(aliceCipher)
-   let bob = require('..')(bobCipher)
-
-   spigot(['hello', 'sweet', 'world'])
-    .pipe(alice.encrypt)
-    .pipe(bob.decrypt)
-    .pipe(bob.encrypt)
-    .pipe(alice.decrypt)
-    .on('data', d => console.log(d.toString()))
-})
-
-// hello
-// sweet
-// world

@@ -8,7 +8,7 @@ node_js:
 install:
 - npm install
 script:
-- grunt mochaTest
+- npm test
 # env:
 #   - CXX=clang
 # addons:

@@ -11,8 +11,8 @@ function str2ab(str) {
     return buf;
 }
 function getPaddedMessageLength(messageLength) {
-    let messageLengthWithTerminator = messageLength + 1
-    let messagePartCount            = Math.floor(messageLengthWithTerminator / 160)
+    var messageLengthWithTerminator = messageLength + 1
+    var messagePartCount            = Math.floor(messageLengthWithTerminator / 160)
     if (messageLengthWithTerminator % 160 !== 0) {
         messagePartCount++
     }
@@ -20,7 +20,7 @@ function getPaddedMessageLength(messageLength) {
 }
 
 function pad (plaintext) {
-    let paddedPlaintext = new Uint8Array(
+    var paddedPlaintext = new Uint8Array(
         getPaddedMessageLength(plaintext.byteLength + 1) - 1
     );
     paddedPlaintext.set(new Uint8Array(plaintext));
@@ -31,8 +31,8 @@ function pad (plaintext) {
 
 function unpad (paddedPlaintext) {
     paddedPlaintext = new Uint8Array(paddedPlaintext);
-    let plaintext;
-    for (let i = paddedPlaintext.length - 1; i >= 0; i--) {
+    var plaintext;
+    for (var i = paddedPlaintext.length - 1; i >= 0; i--) {
         if (paddedPlaintext[i] == 0x80) {
             plaintext = new Uint8Array(i);
             plaintext.set(paddedPlaintext.subarray(0, i));

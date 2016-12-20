@@ -1,4 +1,5 @@
-var h = require('./helpers')
+var signal = require('signal-protocol')
+var h = require('./helpers')(signal)
 var memdb = require('memdb')
 var hypercore = require('hypercore')
 var test = require('tape')
@@ -8,18 +9,20 @@ function myCoreFeed (key) {
 }
 var net = require('net')
 
-let feedA = myCoreFeed()
+var feedA = myCoreFeed()
 
-let server, client, sockRef
+var server, client, sockRef
 test('can replicate hyercore', t => {
   t.plan(6)
 
-  function tryReplicate([aliceCipher, bobCipher]) {
-    let buff = h.imageBuffer()
-    let buffLen = buff.length
+  function tryReplicate (ciphers) {
+    var aliceCipher = ciphers[0]
+    var bobCipher = ciphers[1]
+    var buff = h.imageBuffer()
+    var buffLen = buff.length
     feedA.append(['hello', 'world', buff], function () {
-      let feedKey = feedA.key.toString('hex')
-      let feedB = myCoreFeed(feedKey)
+      var feedKey = feedA.key.toString('hex')
+      var feedB = myCoreFeed(feedKey)
       function checkOk (feed, event) {
         feed.on(event, function (block, data) {
           t.ok(data)
@@ -32,12 +35,12 @@ test('can replicate hyercore', t => {
         t.ok(data.length=4||data.length==buffLen)
       })
       // make stream s for both of them
-      let opts = {
+      var opts = {
         jsonIn: true,
         jsonOut: true,
       }
-      let alice = require('..')(aliceCipher, opts)
-      let bob = require('..')(bobCipher, opts)
+      var alice = require('..')(aliceCipher, opts)
+      var bob = require('..')(bobCipher, opts)
       // first we need alice and bob to introduce themselves
       // (any message will do here)
       alice._encryptF("introduce!")
@@ -46,7 +49,7 @@ test('can replicate hyercore', t => {
       // we can start replicating
         .then(() => {
 
-          let port = 10000
+          var port = 10000
           server = net.createServer(function (socket) {
             socket
               .pipe(alice.decrypt)

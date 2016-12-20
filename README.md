@@ -1,32 +1,43 @@
 # signal-stream
+
 ```
 npm install signal-stream
 ```
+
 encrypt and decrypt streams 
 using the [signal-protocol](https://github.com/elsehow/signal-protocol)
+
+[![Build Status](https://travis-ci.org/elsehow/signal-protocol.svg?branch=master)](https://travis-ci.org/elsehow/signal-protocol)
+
 
 ## example
 
 ```javascript
-var spigot = require('stream-spigot')
-var h = require('signal-stream/test/helpers')
+var sigstream = require('signal-stream')
+var signal = require('signal-protocol')
+var h = require('signal-stream/test/helpers')(signal)
+
 h.bobAliceSessionCiphers()
- .then(([aliceCipher, bobCipher]) => {
-
-   let alice = require('signal-stream')(aliceCipher)
-   let bob = require('signal-stream')(bobCipher)
-
-   spigot(['hello', 'sweet', 'world'])
-    .pipe(alice.encrypt)
-    .pipe(bob.decrypt)
-    .pipe(bob.encrypt)
-    .pipe(alice.decrypt)
-    .on('data', d => console.log(d.toString()))
-})
-
-// hello
-// sweet
-// world
+  .then(([aliceCipher, bobCipher]) => {
+    let alice = sigstream(aliceCipher)
+    let bob = sigstream(bobCipher)
+    require('http')
+      .get({
+        hostname:'info.cern.ch',
+        path: '/hypertext/WWW/TheProject.html',
+      }, res => {
+        res
+          .pipe(alice.encrypt)
+          .pipe(bob.decrypt)
+          .pipe(bob.encrypt)
+          .pipe(alice.decrypt)
+          .on('data', d =>
+              console.log(d.toString()))
+      })
+  })
+// <HEADER>
+// <TITLE>The World Wide Web project</TITLE>
+// ...
 ```
 
 see examples/ for more.

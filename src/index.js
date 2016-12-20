@@ -1,6 +1,6 @@
-let signal = require('signal-protocol')
-let through = require('through2')
-let JSONStream = require('JSONStream')
+var signal = require('signal-protocol')
+var through = require('through2')
+var JSONStream = require('JSONStream')
 const PREKEY_BUNDLE_CODE = 3 //textsecure.protobuf.IncomingPushMessageSignal.Type.PREKEY_BUNDLE
 var pumpify = require('pumpify')
 
@@ -23,7 +23,7 @@ function encryptor (cipher) {
 
 function decryptor (cipher) {
   function bufferify (ab) {
-    let b = new Buffer(ab)
+    var b = new Buffer(ab)
     return b
   }
   // returns a promise of plaintext
@@ -36,23 +36,26 @@ function decryptor (cipher) {
   }
 }
 
-module.exports = function (cipher, opts={}) {
+module.exports = function (cipher, opts) {
 
-  let encryptF = encryptor(cipher)
-  let decryptF = decryptor(cipher)
+  if (!opts)
+    opts={}
 
-  let encS = streamF(encryptF)
-  let decS = streamF(decryptF)
+  var encryptF = encryptor(cipher)
+  var decryptF = decryptor(cipher)
+
+  var encS = streamF(encryptF)
+  var decS = streamF(decryptF)
 
   if (opts.jsonIn) {
     // parse input before decyrpting
-    let parser = JSONStream.parse('*')
+    var parser = JSONStream.parse('*')
     decS = pumpify(parser, decS)
   }
 
   if (opts.jsonOut) {
     // stringifiy output after encrypting
-    let stringer = JSONStream.stringify()
+    var stringer = JSONStream.stringify()
     encS = pumpify(encS, stringer)
   }
 

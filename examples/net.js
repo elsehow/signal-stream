@@ -1,6 +1,8 @@
+let sigstream = require('..')
+let signal = require('signal-protocol')
 let net = require('net')
 let spigot = require('stream-spigot')
-let h = require('../test/helpers')
+let h = require('../test/helpers')(signal)
 let port = 10000
 h.bobAliceSessionCiphers()
  .then(([aliceCipher, bobCipher]) => {
@@ -8,8 +10,8 @@ h.bobAliceSessionCiphers()
      jsonIn: true,
      jsonOut: true,
    }
-   let alice = require('..')(aliceCipher, opts)
-   let bob = require('..')(bobCipher, opts)
+   let alice = sigstream(aliceCipher, opts)
+   let bob = sigstream(bobCipher, opts)
    server = net.createServer(function (socket) {
      console.log('client connected')
      spigot(['hello', 'sweet', 'world'])

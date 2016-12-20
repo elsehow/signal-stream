@@ -1,5 +1,5 @@
-var h = require('./helpers')
 var signal = require('signal-protocol')
+var h = require('./helpers')(signal)
 var read = require('fs').createReadStream
 var through = require('through2')
 var test = require('tape')
@@ -24,9 +24,12 @@ function roundTripEcho (readable, cb) {
         .then(echo, log('ERR'))
 
     // // // the world's slowest impl of `echo`
-    function echo ([aliceCipher, bobCipher]) {
-        let alice = require('..')(aliceCipher)
-        let bob = require('..')(bobCipher)
+    function echo (ciphers) {
+        var aliceCipher = ciphers[0]
+        var bobCipher = ciphers[1]
+        var alice = require('..')(aliceCipher)
+        var bob = require('..')(bobCipher)
+
 
         readable
         .pipe(alice.encrypt)
@@ -50,9 +53,9 @@ test('can echo a long textfile from alice to bob to alice again', t => {
 })
 
 test('can echo an image file', t => {
-   let trueBuf = h.imageBuffer()
-   let dir = __dirname + '/oakland-bridge.jpg'
-   let readable = read(dir)
+   var trueBuf = h.imageBuffer()
+   var dir = __dirname + '/oakland-bridge.jpg'
+   var readable = read(dir)
    roundTripEcho(readable, buff => {
        t.deepEqual(buff, trueBuf,
                    'image perserved after roundtrip')

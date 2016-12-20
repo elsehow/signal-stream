@@ -49,9 +49,9 @@ see `examples/` for more.
 
 returns an object `{ encrypt, decrypt }`.
 
-`encrypt` is a transform stream that takes buffers and produces signal-protocol ciphertext objects (refer to [signal-protocol](https://github.com/elsehow/signal-protocol) for details).
+`encrypt` is a transform stream that consumes (plaintext) buffers and produces (encrypted) ciphertext objects (refer to [signal-protocol](https://github.com/elsehow/signal-protocol) for details).
 
-`decrypt` is a transform stream that takes ciphertext objects and produces buffers.
+`decrypt` is a transform stream that consumes signal-protocol's ciphertext objects and produces plaintext buffers.
 
 the default `opts` are
 
